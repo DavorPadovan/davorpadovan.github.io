@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Humidity calculator</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+	</head>
+	<body>
+		<div class="container my-3">
+			<h3>Relative Humidity Calculator</h3>
+			<p>The following calculator will work out the humidity of the outside air when it has been warmed up to the temperature of your home.</p>
+			
+			<form id="formdata">
+				<div class="row justify-content-center">
+					<div class="col-md-4">
+						<div class="form-group">
+							<label class="sr-only" for="exampleInputAmount">Outside Temperature (&deg;C)</label>
+							<div class="input-group input-group-lg">
+								<input type="number" class="form-control" id="outsideTemp" placeholder="Outside Temperature" />
+								  <div class="input-group-append">
+									<span class="input-group-text">&deg;C</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<label class="sr-only" for="exampleInputAmount">Outside Humidity (%)</label>
+							<div class="input-group input-group-lg">
+								<input type="number" class="form-control" id="outsideHumid" placeholder="Outside Humidity" />
+								<div class="input-group-append">
+									<span class="input-group-text">%</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row justify-content-center">
+					<div class="col-md-4">
+						<div class="form-group">
+							<label class="sr-only" for="exampleInputAmount">Inside Temperature (&deg;C)</label>
+							<div class="input-group input-group-lg">
+								<input type="number" class="form-control" id="insideTemp" placeholder="Inside Temperature" />
+								<div class="input-group-append">
+									<span class="input-group-text">&deg;C</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<label class="sr-only" for="exampleInputAmount">Inside Humidity (%)</label>
+							<div class="input-group input-group-lg">
+								<input type="number" class="form-control" id="insideHumid" placeholder="Inside Humidity" readonly />
+								<div class="input-group-append">
+									<span class="input-group-text">%</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+		<script>
+			$(document).ready(function () {
+				var pastValue, pastSelectionStart, pastSelectionEnd;
+				
+				$("input").on("keydown", function () {
+					pastValue = this.value;
+					pastSelectionStart = this.selectionStart;
+					pastSelectionEnd = this.selectionEnd;
+				}).on("input propertychange", function () {
+					var regex = /^-?[0-9]*\.?[0-9]*$/;
+					
+					if (this.value.length > 0 && !regex.test(this.value)) {
+						this.value = pastValue;
+						this.selectionStart = pastSelectionStart;
+						this.selectionEnd = pastSelectionEnd;
+					}
+
+					computeHumidity();
+				});
+			});
+		
+			function computeHumidity() {
+				var outsideTemp, insideTemp, outsideHumid;
+				
+				outsideTemp = parseFloat($('#outsideTemp').val());
+				outsideHumid = parseFloat($('#outsideHumid').val());
+				insideTemp = parseFloat($('#insideTemp').val());
+				
+				if (!isNaN(outsideTemp) && !isNaN(outsideHumid) && !isNaN(insideTemp)) {
+					var insideHumid, satVarPOut, satVarPIn;
+					satVarPIn = 6.122 * Math.exp(17.62 * insideTemp / (243.12 + insideTemp));
+					satVarPOut = 6.122 * Math.exp(17.62 * outsideTemp / (243.12 + outsideTemp));
+					insideHumid = (insideTemp + 273) * outsideHumid * satVarPOut / ((outsideTemp + 273) * satVarPIn);
+					
+					$('#insideHumid').val(Math.round(insideHumid));
+				}
+			}
+		</script>
+	</body>
+</html>
